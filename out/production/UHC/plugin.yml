@@ -25,6 +25,12 @@ commands:
   "spreadTeams":
     description: Spreads teams evenly around the spawn with a given radius
     usage: /spreadTeams [Spread Radius]
+  "start":
+    description: starts the UHC game, you must spread players seperatley
+    usage: /start
+  "freeze":
+    description: toggles freezing of players
+    usage: /freeze
 
 permissions:
   uhc.help:
@@ -43,3 +49,13 @@ permissions:
     default: op
   uhc.spreadteams:
     description: Allows player to use the spreadTeams command
+    default: op
+  uhc.start:
+    description: Allows player to use the /start command
+    default: op
+  uhc.freeze:
+    description: Allows player to use the /freeze command
+    default: op
+  uhc.freezebypass:
+    description: Allows player to bypass the /freeze command
+    defualt: op

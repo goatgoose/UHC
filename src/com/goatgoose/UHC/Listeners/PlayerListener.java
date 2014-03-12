@@ -7,10 +7,10 @@ import org.bukkit.ChatColor;
 import org.bukkit.entity.Player;
 import org.bukkit.event.EventHandler;
 import org.bukkit.event.Listener;
+import org.bukkit.event.entity.EntityDamageEvent;
+import org.bukkit.event.entity.FoodLevelChangeEvent;
 import org.bukkit.event.entity.PlayerDeathEvent;
-import org.bukkit.event.player.PlayerInteractEvent;
-import org.bukkit.event.player.PlayerJoinEvent;
-import org.bukkit.event.player.PlayerQuitEvent;
+import org.bukkit.event.player.*;
 import org.bukkit.scoreboard.*;
 
 public class PlayerListener implements Listener {
@@ -24,7 +24,9 @@ public class PlayerListener implements Listener {
 
     @EventHandler
     public void onJoin(PlayerJoinEvent event) {
-        plugin.addUHCPlayer(new UHCPlayer(plugin, event.getPlayer()));
+        if(plugin.getUHCPlayer(event.getPlayer()) == null) {
+            plugin.addUHCPlayer(new UHCPlayer(plugin, event.getPlayer()));
+        }
     }
 
     @EventHandler
@@ -38,7 +40,36 @@ public class PlayerListener implements Listener {
     @EventHandler
     public void onInteract(PlayerInteractEvent event) {
         UHCPlayer uhcPlayer = plugin.getUHCPlayer(event.getPlayer());
-        if(uhcPlayer.isSpectating()) {
+        if(uhcPlayer.isSpectating() || plugin.getGamestate() == UHC.GameState.LOBBY) {
+            event.setCancelled(true);
+        }
+    }
+
+    @EventHandler
+    public void onDamage(EntityDamageEvent event) {
+        if(plugin.getGamestate() == UHC.GameState.LOBBY) {
+            event.setCancelled(true);
+        }
+    }
+
+    @EventHandler
+    public void onFoodLevelChange(FoodLevelChangeEvent event) {
+        if(plugin.getGamestate() == UHC.GameState.LOBBY) {
+            event.setCancelled(true);
+        }
+    }
+
+    @EventHandler
+    public void onAchievementGet(PlayerAchievementAwardedEvent event) {
+        if(plugin.getGamestate() == UHC.GameState.LOBBY) {
+            event.setCancelled(true);
+        }
+    }
+
+    @EventHandler
+    public void onMove(PlayerMoveEvent event) {
+        UHCPlayer uhcPlayer = plugin.getUHCPlayer(event.getPlayer());
+        if(uhcPlayer.isFrozen()) {
             event.setCancelled(true);
         }
     }

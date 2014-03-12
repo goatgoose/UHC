@@ -18,6 +18,7 @@ import org.bukkit.scoreboard.Scoreboard;
 import org.bukkit.scoreboard.ScoreboardManager;
 
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.List;
 
 public class UHC extends JavaPlugin {
@@ -33,6 +34,13 @@ public class UHC extends JavaPlugin {
     private Scoreboard scoreboard;
 
     private Objective teamKills;
+
+    private GameState gamestate = GameState.LOBBY;
+
+    public enum GameState {
+        LOBBY,
+        INGAME
+    }
 
     @Override
     public void onEnable() {
@@ -110,58 +118,89 @@ public class UHC extends JavaPlugin {
                         return false;
                     }
                 }
-            } else if(args[0].equalsIgnoreCase("spreadTeams")) {
-                if(args.length != 2) {
-                    sender.sendMessage("Invalid usage! /spreadTeams [Spread Radius]");
-                    return false;
-                } else {
-                    int spreadRadius = 0;
-                    try {
-                        spreadRadius = Integer.parseInt(args[1]);
-                    } catch(Exception e) {
-                        sender.sendMessage("Invalid spread radius! /spreadTeams [Spread Radius]");
-                        return false;
-                    }
-                    Location spawn = player.getWorld().getSpawnLocation();
-                    for(int i = 0; i < teams.size(); i++) {
-                        Team team = teams.get(i);
-
-                        double spreadX = spawn.getBlockX() + spreadRadius * Math.cos((2 * Math.PI * i) / teams.size());
-                        double spreadZ = spawn.getBlockZ() + spreadRadius * Math.sin((2 * Math.PI * i) / teams.size());
-
-                        Location spreadLocation = new Location(player.getWorld(), spreadX, getGround(player.getWorld(), spreadX, spreadZ), spreadZ);
-                        team.teleportTeam(spreadLocation);
-                    }
-                }
             }
-        }
-        if(command.getName().equalsIgnoreCase("spectate")) {
+        } else if(command.getName().equalsIgnoreCase("spectate")) {
             if(args.length == 0) {
                 if(uhcPlayer.isSpectating()) {
                     uhcPlayer.setSpectating(false);
+                    sender.sendMessage("You are no longer spectating.");
                 } else {
                     uhcPlayer.setSpectating(true);
+                    sender.sendMessage("You are now spectating!");
                 }
                 return true;
-            } else if(args.length == 2) {
+            } else if(args.length == 1) {
                 UHCPlayer target = getUHCPlayer(Bukkit.getPlayer(args[0]));
                 if(target == null) {
-                    sender.sendMessage("No player by that name found!  /team spectate [Player]");
-                    return false;
+                    sender.sendMessage("No player by that name found!");
+                    return true;
                 }
                 if(target.isSpectating()) {
                     target.setSpectating(false);
                     sender.sendMessage("Player " + target.getPlayer().getName() + " is no longer spectating.");
+                    return true;
                 } else {
                     target.setSpectating(true);
                     sender.sendMessage("Player " + target.getPlayer().getName() + " is now spectating!");
+                    return true;
                 }
-            } else {
-                sender.sendMessage("Invalid usage! /spectate [Player]");
             }
             return false;
+        } else if(command.getName().equalsIgnoreCase("spreadTeams")) {
+            if(args.length != 1) {
+                return false;
+            } else {
+                int spreadRadius = 0;
+                try {
+                    spreadRadius = Integer.parseInt(args[0]);
+                } catch(Exception e) {
+                    sender.sendMessage(args[0] + " is not a number!");
+                    return false;
+                }
+                spreadTeams(player, spreadRadius);
+                sender.sendMessage("Teams have been spread!");
+                return true;
+            }
+        } else if(command.getName().equalsIgnoreCase("start")) {
+            if(args.length != 0) {
+                return false;
+            } else {
+                gamestate = GameState.INGAME;
+                sender.sendMessage("Game started!");
+                return true;
+            }
+        } else if(command.getName().equalsIgnoreCase("freeze")) {
+            freezePlayers();
         }
         return false;
+    }
+
+    public void freezePlayers() {
+        for(UHCPlayer uhcPlayer : getUhcPlayers()) {
+            Player player = uhcPlayer.getPlayer();
+            if(uhcPlayer.isFrozen()) {
+                if(!player.hasPermission("uhc.freezebypass")) {
+                    uhcPlayer.setFrozen(false);
+                }
+            } else {
+                if(!player.hasPermission("uhc.freezebypass")) {
+                    uhcPlayer.setFrozen(true);
+                }
+            }
+        }
+    }
+
+    public void spreadTeams(Player player, int spreadRadius) {
+        Location spawn = player.getWorld().getSpawnLocation();
+        for(int i = 0; i < teams.size(); i++) {
+            Team team = teams.get(i);
+
+            double spreadX = spawn.getBlockX() + spreadRadius * Math.cos((2 * Math.PI * i) / teams.size());
+            double spreadZ = spawn.getBlockZ() + spreadRadius * Math.sin((2 * Math.PI * i) / teams.size());
+
+            Location spreadLocation = new Location(player.getWorld(), spreadX, getGround(player.getWorld(), spreadX, spreadZ), spreadZ);
+            team.teleportTeam(spreadLocation);
+        }
     }
 
     public int getGround(World world, double x, double z) {
@@ -187,6 +226,14 @@ public class UHC extends JavaPlugin {
         return null;
     }
 
+    public void setGamestate(GameState gamestate) {
+        this.gamestate = gamestate;
+    }
+
+    public GameState getGamestate() {
+        return gamestate;
+    }
+
     public List<UHCPlayer> getUhcPlayers() {
         return uhcPlayers;
     }
@@ -197,6 +244,10 @@ public class UHC extends JavaPlugin {
 
     public Objective getTeamKills() {
         return teamKills;
+    }
+
+    public void addTeam(Team team) {
+        teams.add(team);
     }
 
     public Team getTeam(String teamName) {

@@ -3,6 +3,8 @@ package com.goatgoose.uhc.Model;
 import com.goatgoose.uhc.UHC;
 import org.bukkit.GameMode;
 import org.bukkit.entity.Player;
+import org.bukkit.scoreboard.DisplaySlot;
+import org.bukkit.scoreboard.Objective;
 
 public class UHCPlayer {
 
@@ -10,9 +12,11 @@ public class UHCPlayer {
 
     private Player player;
 
+    private Team team;
+
     private boolean spectating = false;
 
-    private Team team;
+    private boolean frozen = false;
 
     public UHCPlayer(UHC instance, Player player) {
         plugin = instance;
@@ -57,6 +61,14 @@ public class UHCPlayer {
 
     public boolean isSpectating() {
         return spectating;
+    }
+
+    public boolean isFrozen() {
+        return frozen;
+    }
+
+    public void setFrozen(boolean isFrozen) {
+        frozen = isFrozen;
     }
 
 }

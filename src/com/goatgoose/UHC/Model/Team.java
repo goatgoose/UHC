@@ -22,10 +22,9 @@ public class Team {
 
     private List<UHCPlayer> members = new ArrayList<UHCPlayer>();
 
-    private Objective
-
     public Team(UHC instance, String teamName, String teamColor) {
         plugin = instance;
+        plugin.addTeam(this);
         setTeamName(teamName);
         this.teamColor = ChatColor.valueOf(teamColor);
 
@@ -47,9 +46,6 @@ public class Team {
         Player player = uhcPlayer.getPlayer();
         members.add(uhcPlayer);
         player.setPlayerListName(teamColor + player.getName());
-        Objective objective = plugin.getScoreboard().registerNewObjective(player.getName(), "dummy");
-        objective.setDisplaySlot(DisplaySlot.BELOW_NAME);
-        objective.setDisplayName(teamName);
     }
 
     public void removeMember(UHCPlayer uhcPlayer) {
