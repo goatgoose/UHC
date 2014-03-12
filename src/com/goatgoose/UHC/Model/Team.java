@@ -26,7 +26,7 @@ public class Team {
         plugin = instance;
         plugin.addTeam(this);
         setTeamName(teamName);
-        this.teamColor = ChatColor.valueOf(teamColor);
+        this.teamColor = ChatColor.valueOf(teamColor.toUpperCase());
 
         teamKills = plugin.getTeamKills().getScore(Bukkit.getOfflinePlayer(this.teamColor + teamName));
     }

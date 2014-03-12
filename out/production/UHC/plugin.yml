@@ -44,6 +44,7 @@ permissions:
     default: op
   uhc.team.setscore:
     description: Allows player to set the score of a team
+    defualt op
   uhc.spectate:
     description: Allows player to toggle spectate mode on target player
     default: op

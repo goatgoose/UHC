@@ -70,7 +70,6 @@ public class UHC extends JavaPlugin {
         if(command.getName().equalsIgnoreCase("team")) {
             if(args[0].equalsIgnoreCase("create")) {
                 if(args.length != 3) {
-                    sender.sendMessage("Incorrect usage!  /team create [Team Name] [Team Color]");
                     return false;
                 } else {
                     Team newTeam = new Team(this, args[1], args[2]);
@@ -81,17 +80,16 @@ public class UHC extends JavaPlugin {
                 }
             } else if(args[0].equalsIgnoreCase("addPlayer")) {
                 if(args.length != 3) {
-                    sender.sendMessage("Incorrect usage!  /team addPlayer [Team] [Player]");
                     return false;
                 } else {
                     UHCPlayer playerToAdd = getUHCPlayer(Bukkit.getPlayer(args[2]));
                     if(playerToAdd == null) {
-                        sender.sendMessage("No player by that name found!  /team addPlayer [Team] [Player]");
+                        sender.sendMessage("No player by that name found!");
                         return false;
                     }
                     Team team = getTeam(args[1]);
                     if(team == null) {
-                        sender.sendMessage("No team by that name found!  /team addPlayer [Team] [Player]");
+                        sender.sendMessage("No team by that name found!");
                         return false;
                     } else {
                         playerToAdd.setTeam(team);
@@ -101,12 +99,11 @@ public class UHC extends JavaPlugin {
                 }
             } else if(args[0].equalsIgnoreCase("setScore")) {
                 if(args.length != 3) {
-                    sender.sendMessage("Incorrect usage! /team setScore [Team] [Score]");
                     return false;
                 } else {
                     Team team = getTeam(args[1]);
                     if(team == null) {
-                        sender.sendMessage("No team by that name found!  /team setScore [Team] [Score]");
+                        sender.sendMessage("No team by that name found!");
                         return false;
                     }
                     try {
@@ -114,7 +111,7 @@ public class UHC extends JavaPlugin {
                         team.setTeamKills(score);
                         return true;
                     } catch(Exception e) {
-                        sender.sendMessage("Invalid score! /team setScore [Team] [Score]");
+                        sender.sendMessage("Invalid score!");
                         return false;
                     }
                 }
@@ -158,6 +155,7 @@ public class UHC extends JavaPlugin {
                     return false;
                 }
                 spreadTeams(player, spreadRadius);
+                freezePlayers();
                 sender.sendMessage("Teams have been spread!");
                 return true;
             }
