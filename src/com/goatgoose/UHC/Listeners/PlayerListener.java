@@ -1,6 +1,6 @@
 package com.goatgoose.uhc.Listeners;
 
-import com.goatgoose.uhc.Model.UHCPlayer;
+import com.goatgoose.uhc.Model.*;
 import com.goatgoose.uhc.UHC;
 import org.bukkit.Bukkit;
 import org.bukkit.ChatColor;
@@ -11,7 +11,9 @@ import org.bukkit.event.entity.EntityDamageEvent;
 import org.bukkit.event.entity.FoodLevelChangeEvent;
 import org.bukkit.event.entity.PlayerDeathEvent;
 import org.bukkit.event.player.*;
-import org.bukkit.scoreboard.*;
+
+import java.util.ArrayList;
+import java.util.List;
 
 public class PlayerListener implements Listener {
 
@@ -34,7 +36,24 @@ public class PlayerListener implements Listener {
         UHCPlayer uhcPlayer = plugin.getUHCPlayer(event.getEntity());
         uhcPlayer.setSpectating(true);
         UHCPlayer killer = plugin.getUHCPlayer(event.getEntity().getKiller());
-        killer.getTeam().addTeamKill();
+        if(killer != null) {
+            killer.getTeam().addTeamKill();
+        }
+
+        List<Team> teamsRemaining = new ArrayList<Team>();
+        for(UHCPlayer player : plugin.getUhcPlayers()) {
+            if(!player.isSpectating()) {
+                if(!teamsRemaining.contains(player.getTeam())) {
+                    teamsRemaining.add(player.getTeam());
+                }
+            }
+        }
+        if(teamsRemaining.size() == 1) {
+            plugin.setGamestate(UHC.GameState.LOBBY);
+            Team team = teamsRemaining.get(0);
+            Bukkit.broadcastMessage(ChatColor.GOLD + "TEAM " + team.getTeamName().toUpperCase() + " HAS WON UHC");
+        }
+
     }
 
     @EventHandler
