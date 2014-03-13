@@ -18,6 +18,8 @@ public class UHCPlayer {
 
     private boolean frozen = false;
 
+    int episodeMarkInterval = 0; // in minutes
+
     public UHCPlayer(UHC instance, Player player) {
         plugin = instance;
         this.player = player;
@@ -69,6 +71,14 @@ public class UHCPlayer {
 
     public void setFrozen(boolean isFrozen) {
         frozen = isFrozen;
+    }
+
+    public void setEpisodeMarkInterval(int interval) {
+        episodeMarkInterval = interval;
+    }
+
+    public int getEpisodeMarkInterval() {
+        return episodeMarkInterval;
     }
 
 }

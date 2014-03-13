@@ -12,51 +12,62 @@ commands:
     usage: /team create [Team Name] [Team Color]
     permission: uhc.team.create
   "team addPlayer":
-    description: Adds a player to a team
+    description: Adds a new player to the specified team
     usage: /team addPlayer [Team] [Player]
     permission: uhc.team.addplayer
   "team setScore":
-    description: Sets the score for the team
+    description: Replaces the team's score with the specified score
     usage: /team setScore [Team] [Score]
+    permission: uhc.team.setScore
   "spectate":
-    description: Toggles spectate for target player, defaults to self
+    description: Toggles spectate mode for the specified player
     usage: /spectate [Player]
     permission: uhc.spectate
   "spreadTeams":
     description: Spreads teams evenly around the spawn with a given radius
     usage: /spreadTeams [Spread Radius]
+    permission: uhc.spreadteams
   "start":
-    description: starts the UHC game, you must spread players seperatley
+    description: Starts the game
     usage: /start
+    perimssion: uhc.start
   "freeze":
-    description: toggles freezing of players
+    description: Freezes all players without the uhc.freezebypass permission
     usage: /freeze
+    permission: uhc.freeze
+  "episodeInterval":
+    description: Sets the interval (in minutes) to mark the end of an episode when recording, set to 0 to disable
+    usage: /episodeInterval [Interval]
+    permission: uhc.episodeinterval
 
 permissions:
   uhc.help:
     description: Allows player to view plugin help files
     default: op
   uhc.team.create:
-    description: Allows player to create a new team
+    description: Allows player permission to the /team create command
     default: op
   uhc.team.addplayer:
-    description: Allows player to add a player to a team
+    description: Allows player permission to the /team addPlayer command
     default: op
   uhc.team.setscore:
-    description: Allows player to set the score of a team
-    defualt op
+    description: Allows player permission to the /team setScore command
+    defualt: op
   uhc.spectate:
-    description: Allows player to toggle spectate mode on target player
+    description: Allows player permission to the /spectate command
     default: op
   uhc.spreadteams:
-    description: Allows player to use the spreadTeams command
+    description: Allows player permission to the /spreadTeams command
     default: op
   uhc.start:
-    description: Allows player to use the /start command
+    description: Allows player permission to the /start command
     default: op
   uhc.freeze:
-    description: Allows player to use the /freeze command
+    description: Allows player permission to the /freeze command
     default: op
   uhc.freezebypass:
-    description: Allows player to bypass the /freeze command
+    description: Allows player to bypass the effects of the /freeze command
     defualt: op
+  uhc.upisodeinterval:
+    description: Allows player permission to the /episodeInterval command
+    default: true

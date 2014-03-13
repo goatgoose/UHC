@@ -3,6 +3,7 @@ package com.goatgoose.uhc;
 import com.goatgoose.uhc.Listeners.PlayerListener;
 import com.goatgoose.uhc.Model.Team;
 import com.goatgoose.uhc.Model.UHCPlayer;
+import com.goatgoose.uhc.Tasks.EpisodeMarkerTask;
 import org.bukkit.Bukkit;
 import org.bukkit.Location;
 import org.bukkit.Material;
@@ -12,6 +13,7 @@ import org.bukkit.command.Command;
 import org.bukkit.command.CommandSender;
 import org.bukkit.entity.Player;
 import org.bukkit.plugin.java.JavaPlugin;
+import org.bukkit.scheduler.BukkitScheduler;
 import org.bukkit.scoreboard.DisplaySlot;
 import org.bukkit.scoreboard.Objective;
 import org.bukkit.scoreboard.Scoreboard;
@@ -163,12 +165,33 @@ public class UHC extends JavaPlugin {
             if(args.length != 0) {
                 return false;
             } else {
-                gamestate = GameState.INGAME;
+                gameStart();
                 sender.sendMessage("Game started!");
                 return true;
             }
         } else if(command.getName().equalsIgnoreCase("freeze")) {
+            if(args.length != 0) {
+                return false;
+            }
             freezePlayers();
+            return true;
+        } else if(command.getName().equalsIgnoreCase("episodeInterval")) {
+            if(args.length != 1) {
+                return false;
+            }
+            int interval = -1;
+            try {
+                interval = Integer.parseInt(args[0]);
+            } catch(Exception e) {
+                sender.sendMessage(args[0] + " is not a number!");
+                return false;
+            }
+            if(interval >= 0) {
+                uhcPlayer.setEpisodeMarkInterval(interval);
+                sender.sendMessage("Set episode interval to " + args[0]);
+                return true;
+            }
+            return false;
         }
         return false;
     }
@@ -222,6 +245,19 @@ public class UHC extends JavaPlugin {
             }
         }
         return null;
+    }
+
+    public void gameStart() {
+        gamestate = GameState.INGAME;
+
+        BukkitScheduler scheduler = Bukkit.getServer().getScheduler();
+        for(UHCPlayer uhcPlayer : getUhcPlayers()) {
+            int episodeMarkInterval = uhcPlayer.getEpisodeMarkInterval();
+            if(episodeMarkInterval > 0) {
+                int episodeMarkIntervalTicks = episodeMarkInterval * 60 * 20; // convert to seconds (*60), convert to ticks (*20)
+                scheduler.scheduleSyncRepeatingTask(this, new EpisodeMarkerTask(this, uhcPlayer.getPlayer()), episodeMarkIntervalTicks, episodeMarkIntervalTicks);
+            }
+        }
     }
 
     public void setGamestate(GameState gamestate) {
