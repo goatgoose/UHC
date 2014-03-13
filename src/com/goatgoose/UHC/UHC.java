@@ -3,11 +3,9 @@ package com.goatgoose.uhc;
 import com.goatgoose.uhc.Listeners.PlayerListener;
 import com.goatgoose.uhc.Model.Team;
 import com.goatgoose.uhc.Model.UHCPlayer;
+import com.goatgoose.uhc.Tasks.CountdownTask;
 import com.goatgoose.uhc.Tasks.EpisodeMarkerTask;
-import org.bukkit.Bukkit;
-import org.bukkit.Location;
-import org.bukkit.Material;
-import org.bukkit.World;
+import org.bukkit.*;
 import org.bukkit.block.Block;
 import org.bukkit.command.Command;
 import org.bukkit.command.CommandSender;
@@ -133,7 +131,7 @@ public class UHC extends JavaPlugin {
                 UHCPlayer target = getUHCPlayer(Bukkit.getPlayer(args[0]));
                 if(target == null) {
                     sender.sendMessage("No player by that name found!");
-                    return true;
+                    return false;
                 }
                 if(target.isSpectating()) {
                     target.setSpectating(false);
@@ -166,8 +164,8 @@ public class UHC extends JavaPlugin {
             if(args.length != 0) {
                 return false;
             } else {
-                gameStart();
-                sender.sendMessage("Game started!");
+                BukkitScheduler scheduler = Bukkit.getServer().getScheduler();
+                scheduler.scheduleSyncRepeatingTask(this, new CountdownTask(this, 30), 0, 20);
                 return true;
             }
         } else if(command.getName().equalsIgnoreCase("freeze")) {
@@ -262,6 +260,7 @@ public class UHC extends JavaPlugin {
 
     public void gameStart() {
         gamestate = GameState.INGAME;
+        Bukkit.broadcastMessage(ChatColor.GOLD + "FIGHT!");
 
         BukkitScheduler scheduler = Bukkit.getServer().getScheduler();
         for(UHCPlayer uhcPlayer : getUhcPlayers()) {
@@ -270,6 +269,7 @@ public class UHC extends JavaPlugin {
                 int episodeMarkIntervalTicks = episodeMarkInterval * 60 * 20; // convert to seconds (*60), convert to ticks (*20)
                 scheduler.scheduleSyncRepeatingTask(this, new EpisodeMarkerTask(this, uhcPlayer.getPlayer()), episodeMarkIntervalTicks, episodeMarkIntervalTicks);
             }
+            uhcPlayer.setFrozen(false);
         }
     }
 

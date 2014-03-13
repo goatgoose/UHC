@@ -77,7 +77,6 @@ public class UHCPlayer {
         if(frozen) {
             BukkitScheduler scheduler = Bukkit.getServer().getScheduler();
             scheduler.scheduleSyncRepeatingTask(plugin, new PlayerFreezeTask(plugin, this), 0, 10);
-
         }
     }
 
