@@ -65,13 +65,4 @@ public class PlayerListener implements Listener {
             event.setCancelled(true);
         }
     }
-
-    @EventHandler
-    public void onMove(PlayerMoveEvent event) {
-        UHCPlayer uhcPlayer = plugin.getUHCPlayer(event.getPlayer());
-        if(uhcPlayer.isFrozen()) {
-            event.setCancelled(true);
-        }
-    }
-
 }

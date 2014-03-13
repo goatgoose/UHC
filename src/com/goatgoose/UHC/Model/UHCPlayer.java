@@ -1,8 +1,11 @@
 package com.goatgoose.uhc.Model;
 
+import com.goatgoose.uhc.Tasks.PlayerFreezeTask;
 import com.goatgoose.uhc.UHC;
+import org.bukkit.Bukkit;
 import org.bukkit.GameMode;
 import org.bukkit.entity.Player;
+import org.bukkit.scheduler.BukkitScheduler;
 import org.bukkit.scoreboard.DisplaySlot;
 import org.bukkit.scoreboard.Objective;
 
@@ -71,6 +74,11 @@ public class UHCPlayer {
 
     public void setFrozen(boolean isFrozen) {
         frozen = isFrozen;
+        if(frozen) {
+            BukkitScheduler scheduler = Bukkit.getServer().getScheduler();
+            scheduler.scheduleSyncRepeatingTask(plugin, new PlayerFreezeTask(plugin, this), 0, 10);
+
+        }
     }
 
     public void setEpisodeMarkInterval(int interval) {

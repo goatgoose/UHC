@@ -13,6 +13,7 @@ import org.bukkit.command.Command;
 import org.bukkit.command.CommandSender;
 import org.bukkit.entity.Player;
 import org.bukkit.plugin.java.JavaPlugin;
+import org.bukkit.scheduler.BukkitRunnable;
 import org.bukkit.scheduler.BukkitScheduler;
 import org.bukkit.scoreboard.DisplaySlot;
 import org.bukkit.scoreboard.Objective;
@@ -200,14 +201,18 @@ public class UHC extends JavaPlugin {
         for(UHCPlayer uhcPlayer : getUhcPlayers()) {
             Player player = uhcPlayer.getPlayer();
             if(uhcPlayer.isFrozen()) {
-                if(!player.hasPermission("uhc.freezebypass")) {
-                    uhcPlayer.setFrozen(false);
-                }
+                uhcPlayer.setFrozen(false);
             } else {
                 if(!player.hasPermission("uhc.freezebypass")) {
                     uhcPlayer.setFrozen(true);
                 }
             }
+        }
+    }
+
+    public void freezeAllPlayers() {
+        for(UHCPlayer uhcPlayer : getUhcPlayers()) {
+            uhcPlayer.setFrozen(true);
         }
     }
 
@@ -219,19 +224,27 @@ public class UHC extends JavaPlugin {
             double spreadX = spawn.getBlockX() + spreadRadius * Math.cos((2 * Math.PI * i) / teams.size());
             double spreadZ = spawn.getBlockZ() + spreadRadius * Math.sin((2 * Math.PI * i) / teams.size());
 
-            Location spreadLocation = new Location(player.getWorld(), spreadX, getGround(player.getWorld(), spreadX, spreadZ), spreadZ);
+            Location spreadLocation = player.getWorld().getHighestBlockAt(new Location(player.getWorld(), spreadX, 0, spreadZ)).getLocation();
             team.teleportTeam(spreadLocation);
         }
+
+        new BukkitRunnable() {
+            @Override
+            public void run() {
+                freezeAllPlayers();
+                getLogger().info("froze players");
+            }
+        }.runTaskLater(this, 20);
     }
 
-    public int getGround(World world, double x, double z) {
+    public Location getGround(World world, double x, double z) {
         for(int y = world.getMaxHeight(); y > 0; y = y - 1) {
             Location location = new Location(world, x, y, z);
             if(location.getBlock().getType() != Material.AIR) {
-                return y;
+                return location;
             }
         }
-        return 0;
+        return new Location(world, x, 0, z);
     }
 
     public void addUHCPlayer(UHCPlayer uhcPlayer) {
