@@ -3,6 +3,7 @@ package com.goatgoose.uhc.Model;
 import com.goatgoose.uhc.Tasks.PlayerFreezeTask;
 import com.goatgoose.uhc.UHC;
 import org.bukkit.Bukkit;
+import org.bukkit.ChatColor;
 import org.bukkit.GameMode;
 import org.bukkit.entity.Player;
 import org.bukkit.scheduler.BukkitScheduler;
@@ -36,13 +37,13 @@ public class UHCPlayer {
             player.sendMessage("You are now spectating!");
             player.sendMessage("Remember to mute your mumble, or dedotaded will eat you!");
             player.setGameMode(GameMode.CREATIVE);
-            for(UHCPlayer uhcPlayer : plugin.getUhcPlayers()) {
+            for(UHCPlayer uhcPlayer : plugin.getUHCPlayers()) {
                 uhcPlayer.getPlayer().hidePlayer(player);
             }
         } else {
             player.sendMessage("You are no longer spectating.");
             player.setGameMode(GameMode.SURVIVAL);
-            for(UHCPlayer uhcPlayer : plugin.getUhcPlayers()) {
+            for(UHCPlayer uhcPlayer : plugin.getUHCPlayers()) {
                 uhcPlayer.getPlayer().showPlayer(player);
             }
         }
@@ -54,6 +55,11 @@ public class UHCPlayer {
         }
         this.team = team;
         this.team.addMember(this);
+    }
+
+    public void resetTeam() {
+        team = new Team(plugin, player.getName(), "GRAY");
+        player.setPlayerListName(ChatColor.GRAY + player.getName());
     }
 
     public Team getTeam() {

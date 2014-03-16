@@ -26,7 +26,8 @@ public class PlayerFreezeTask extends BukkitRunnable {
         if(uhcPlayer.isFrozen()) {
             uhcPlayer.getPlayer().teleport(location);
         } else {
-            cancel();
+            // temp until Bukkit fixes "Not scheduled yet" error
+            return;
         }
     }
 

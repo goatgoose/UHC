@@ -15,10 +15,22 @@ commands:
     description: Adds a new player to the specified team
     usage: /team addPlayer [Team] [Player]
     permission: uhc.team.addplayer
+  "team removePlayer":
+    description: Removes a player from any joined teams
+    usage: /team removePlayer [Player]
+    permission: uhc.team.removeplayer
   "team setScore":
     description: Replaces the team's score with the specified score
     usage: /team setScore [Team] [Score]
-    permission: uhc.team.setScore
+    permission: uhc.team.setscore
+  "team setColor":
+    description: Sets the team's color
+    usage: /team setColor [Team] [Color]
+    permission: uhc.team.setcolor
+  "team list":
+    description: Lists all created teams, or players in team if team is defined
+    usage: /team list [Team]
+    permission: uhc.team.list
   "spectate":
     description: Toggles spectate mode for the specified player
     usage: /spectate [Player]
@@ -50,9 +62,21 @@ permissions:
   uhc.team.addplayer:
     description: Allows player permission to the /team addPlayer command
     default: op
+  uhc.team.removeplayer:
+    description: Allows player permission to the /team removePlayer command
+    default: op
   uhc.team.setscore:
     description: Allows player permission to the /team setScore command
     defualt: op
+  uhc.team.setcolor:
+    description: Allows player permission to the /team setColor command
+    defualt: true
+  uhc.team.setothercolor:
+    description: Allows player permission to specify a team other than their own when using the /team setColor command
+    defualt: op
+  uhc.team.list:
+    description: Allows player permission to the /team list command
+    defualt: true
   uhc.spectate:
     description: Allows player permission to the /spectate command
     default: op
@@ -68,6 +92,6 @@ permissions:
   uhc.freezebypass:
     description: Allows player to bypass the effects of the /freeze command
     defualt: op
-  uhc.upisodeinterval:
+  uhc.episodeinterval:
     description: Allows player permission to the /episodeInterval command
     default: true

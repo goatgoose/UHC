@@ -41,7 +41,7 @@ public class PlayerListener implements Listener {
         }
 
         List<Team> teamsRemaining = new ArrayList<Team>();
-        for(UHCPlayer player : plugin.getUhcPlayers()) {
+        for(UHCPlayer player : plugin.getUHCPlayers()) {
             if(!player.isSpectating()) {
                 if(!teamsRemaining.contains(player.getTeam())) {
                     teamsRemaining.add(player.getTeam());

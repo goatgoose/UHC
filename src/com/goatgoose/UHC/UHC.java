@@ -74,7 +74,6 @@ public class UHC extends JavaPlugin {
                     return false;
                 } else {
                     Team newTeam = new Team(this, args[1], args[2]);
-                    teams.add(newTeam);
                     newTeam.setVisible();
                     sender.sendMessage("Team " + args[1] + " created!");
                     return true;
@@ -98,6 +97,14 @@ public class UHC extends JavaPlugin {
                         return true;
                     }
                 }
+            } else if(args[0].equalsIgnoreCase("removePlayer")) {
+                if(args.length != 2) {
+                    return false;
+                } else {
+                    UHCPlayer playerToRemove = getUHCPlayer(Bukkit.getPlayer(args[1]));
+                    playerToRemove.getTeam().removeMember(playerToRemove);
+                    return true;
+                }
             } else if(args[0].equalsIgnoreCase("setScore")) {
                 if(args.length != 3) {
                     return false;
@@ -115,6 +122,51 @@ public class UHC extends JavaPlugin {
                         sender.sendMessage("Invalid score!");
                         return false;
                     }
+                }
+            } else if(args[0].equalsIgnoreCase("setColor")) {
+                if(args.length == 2) {
+                    ChatColor chatColor = ChatColor.valueOf(args[1].toUpperCase());
+                    uhcPlayer.getTeam().setTeamColor(chatColor);
+                    return false;
+                } else if(args.length == 3) {
+                    if(uhcPlayer.getPlayer().hasPermission("uhc.team.setothercolor")) {
+                        Team team = getUHCPlayer(Bukkit.getPlayer(args[1])).getTeam();
+                        ChatColor chatColor = ChatColor.valueOf(args[2].toUpperCase());
+                        team.setTeamColor(chatColor);
+                        return true;
+                    }
+                } else {
+                    return false;
+                }
+            } else if(args[0].equalsIgnoreCase("list")) {
+                if(args.length == 1) {
+                    if(getCreatedTeams().size() == 0) {
+                        sender.sendMessage("No created teams");
+                    } else {
+                        sender.sendMessage("Created teams:");
+                        for(Team team : getCreatedTeams()) {
+                            sender.sendMessage(team.getColor() + team.getTeamName());
+                        }
+                    }
+                    return true;
+                } else if(args.length == 2) {
+                    if(getTeam(args[1]) != null) {
+                        Team team = getTeam(args[1]);
+                        if(team.getMembers().size() == 0) {
+                            sender.sendMessage("No players in " + team.getTeamName());
+                        } else {
+                            sender.sendMessage("Players in " + team.getTeamName() + ":");
+                            for(UHCPlayer member : team.getMembers()) {
+                                sender.sendMessage(member.getPlayer().getName());
+                            }
+                        }
+                        return true;
+                    } else {
+                        sender.sendMessage(args[1] + " not found");
+                        return true;
+                    }
+                } else {
+                    return false;
                 }
             }
         } else if(command.getName().equalsIgnoreCase("spectate")) {
@@ -196,7 +248,7 @@ public class UHC extends JavaPlugin {
     }
 
     public void freezePlayers() {
-        for(UHCPlayer uhcPlayer : getUhcPlayers()) {
+        for(UHCPlayer uhcPlayer : getUHCPlayers()) {
             Player player = uhcPlayer.getPlayer();
             if(uhcPlayer.isFrozen()) {
                 uhcPlayer.setFrozen(false);
@@ -209,7 +261,7 @@ public class UHC extends JavaPlugin {
     }
 
     public void freezeAllPlayers() {
-        for(UHCPlayer uhcPlayer : getUhcPlayers()) {
+        for(UHCPlayer uhcPlayer : getUHCPlayers()) {
             uhcPlayer.setFrozen(true);
         }
     }
@@ -260,10 +312,10 @@ public class UHC extends JavaPlugin {
 
     public void gameStart() {
         gamestate = GameState.INGAME;
-        Bukkit.broadcastMessage(ChatColor.GOLD + "FIGHT!");
+        Bukkit.broadcastMessage(ChatColor.GOLD + "BEGIN!");
 
         BukkitScheduler scheduler = Bukkit.getServer().getScheduler();
-        for(UHCPlayer uhcPlayer : getUhcPlayers()) {
+        for(UHCPlayer uhcPlayer : getUHCPlayers()) {
             int episodeMarkInterval = uhcPlayer.getEpisodeMarkInterval();
             if(episodeMarkInterval > 0) {
                 int episodeMarkIntervalTicks = episodeMarkInterval * 60 * 20; // convert to seconds (*60), convert to ticks (*20)
@@ -281,7 +333,7 @@ public class UHC extends JavaPlugin {
         return gamestate;
     }
 
-    public List<UHCPlayer> getUhcPlayers() {
+    public List<UHCPlayer> getUHCPlayers() {
         return uhcPlayers;
     }
 
@@ -304,6 +356,23 @@ public class UHC extends JavaPlugin {
             }
         }
         return null;
+    }
+
+    public List<Team> getTeams() {
+        return teams;
+    }
+
+    public List<Team> getCreatedTeams() {
+        List<Team> createdTeams = new ArrayList<Team>();
+        for(Team team : getTeams()) {
+            for(UHCPlayer uhcPlayer : getUHCPlayers()) {
+                if(!team.getTeamName().equals(uhcPlayer.getPlayer().getName())) {
+                    createdTeams.add(team);
+                    break;
+                }
+            }
+        }
+        return createdTeams;
     }
 
     public ScoreboardManager getScoreboardManager() {

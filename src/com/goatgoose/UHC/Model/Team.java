@@ -43,13 +43,13 @@ public class Team {
     }
 
     public void addMember(UHCPlayer uhcPlayer) {
-        Player player = uhcPlayer.getPlayer();
         members.add(uhcPlayer);
-        player.setPlayerListName(teamColor + player.getName());
+        uhcPlayer.getPlayer().setPlayerListName(teamColor + uhcPlayer.getPlayer().getName());
     }
 
     public void removeMember(UHCPlayer uhcPlayer) {
         members.remove(uhcPlayer);
+        uhcPlayer.resetTeam();
     }
 
     public List<UHCPlayer> getMembers() {
@@ -74,5 +74,13 @@ public class Team {
 
     public int getTeamKills() {
         return teamKills.getScore();
+    }
+
+    public ChatColor getColor() {
+        return teamColor;
+    }
+
+    public void setTeamColor(ChatColor chatColor) {
+        teamColor = chatColor;
     }
 }
