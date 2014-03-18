@@ -6,7 +6,6 @@ import com.goatgoose.uhc.Model.UHCPlayer;
 import com.goatgoose.uhc.Tasks.CountdownTask;
 import com.goatgoose.uhc.Tasks.EpisodeMarkerTask;
 import org.bukkit.*;
-import org.bukkit.block.Block;
 import org.bukkit.command.Command;
 import org.bukkit.command.CommandSender;
 import org.bukkit.entity.Player;
@@ -19,7 +18,6 @@ import org.bukkit.scoreboard.Scoreboard;
 import org.bukkit.scoreboard.ScoreboardManager;
 
 import java.util.ArrayList;
-import java.util.HashMap;
 import java.util.List;
 
 public class UHC extends JavaPlugin {
@@ -36,6 +34,8 @@ public class UHC extends JavaPlugin {
 
     private Objective teamKills;
 
+    private Objective healthObj;
+
     private GameState gamestate = GameState.LOBBY;
 
     public enum GameState {
@@ -50,10 +50,12 @@ public class UHC extends JavaPlugin {
         scoreboardManager = Bukkit.getScoreboardManager();
         scoreboard = scoreboardManager.getNewScoreboard();
 
-        teamKills = scoreboard.registerNewObjective("teamKills", "dummy");
-
+        teamKills = scoreboard.registerNewObjective("teamKillsObj", "dummy");
         teamKills.setDisplaySlot(DisplaySlot.SIDEBAR);
         teamKills.setDisplayName("Team Kills");
+
+        healthObj = scoreboard.registerNewObjective("Health", "health");
+        healthObj.setDisplaySlot(DisplaySlot.PLAYER_LIST);
     }
 
     @Override
@@ -140,11 +142,11 @@ public class UHC extends JavaPlugin {
                 }
             } else if(args[0].equalsIgnoreCase("list")) {
                 if(args.length == 1) {
-                    if(getCreatedTeams().size() == 0) {
-                        sender.sendMessage("No created teams");
+                    if(getTeams().size() == 0) {
+                        sender.sendMessage("No teams created");
                     } else {
-                        sender.sendMessage("Created teams:");
-                        for(Team team : getCreatedTeams()) {
+                        sender.sendMessage("Teams:");
+                        for(Team team : getTeams()) {
                             sender.sendMessage(team.getColor() + team.getTeamName());
                         }
                     }
@@ -157,7 +159,7 @@ public class UHC extends JavaPlugin {
                         } else {
                             sender.sendMessage("Players in " + team.getTeamName() + ":");
                             for(UHCPlayer member : team.getMembers()) {
-                                sender.sendMessage(member.getPlayer().getName());
+                                sender.sendMessage(member.getNameWithColor());
                             }
                         }
                         return true;
@@ -217,7 +219,8 @@ public class UHC extends JavaPlugin {
                 return false;
             } else {
                 BukkitScheduler scheduler = Bukkit.getServer().getScheduler();
-                scheduler.scheduleSyncRepeatingTask(this, new CountdownTask(this, 30), 0, 20);
+                int countdownID = 0;
+                countdownID = scheduler.scheduleSyncRepeatingTask(this, new CountdownTask(this, 30, countdownID), 0, 20);
                 return true;
             }
         } else if(command.getName().equalsIgnoreCase("freeze")) {
@@ -360,19 +363,6 @@ public class UHC extends JavaPlugin {
 
     public List<Team> getTeams() {
         return teams;
-    }
-
-    public List<Team> getCreatedTeams() {
-        List<Team> createdTeams = new ArrayList<Team>();
-        for(Team team : getTeams()) {
-            for(UHCPlayer uhcPlayer : getUHCPlayers()) {
-                if(!team.getTeamName().equals(uhcPlayer.getPlayer().getName())) {
-                    createdTeams.add(team);
-                    break;
-                }
-            }
-        }
-        return createdTeams;
     }
 
     public ScoreboardManager getScoreboardManager() {

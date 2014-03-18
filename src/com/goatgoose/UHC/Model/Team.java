@@ -49,7 +49,7 @@ public class Team {
 
     public void removeMember(UHCPlayer uhcPlayer) {
         members.remove(uhcPlayer);
-        uhcPlayer.resetTeam();
+        uhcPlayer.getPlayer().setPlayerListName(ChatColor.GRAY + uhcPlayer.getPlayer().getName());
     }
 
     public List<UHCPlayer> getMembers() {

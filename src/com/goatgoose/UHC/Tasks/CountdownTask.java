@@ -16,16 +16,20 @@ public class CountdownTask extends BukkitRunnable {
 
     int counter;
 
-    public CountdownTask(UHC instance, int countTo) {
+    int id;
+
+    public CountdownTask(UHC instance, int countTo, int id) {
         plugin = instance;
         this.countTo = countTo;
         this.counter = countTo;
+        this.id = id;
     }
 
     @Override
     public void run() {
         if(plugin.getGamestate() == UHC.GameState.INGAME) {
             // temporary until Bukkit fixes "not yet scheduled" errors
+            Bukkit.getScheduler().cancelTask(id);
             return;
         } else if(counter <= 0) {
             plugin.gameStart();

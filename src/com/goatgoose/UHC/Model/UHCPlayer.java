@@ -5,6 +5,7 @@ import com.goatgoose.uhc.UHC;
 import org.bukkit.Bukkit;
 import org.bukkit.ChatColor;
 import org.bukkit.GameMode;
+import org.bukkit.entity.Damageable;
 import org.bukkit.entity.Player;
 import org.bukkit.scheduler.BukkitScheduler;
 import org.bukkit.scoreboard.DisplaySlot;
@@ -16,7 +17,7 @@ public class UHCPlayer {
 
     private Player player;
 
-    private Team team;
+    private Team team = null;
 
     private boolean spectating = false;
 
@@ -24,11 +25,13 @@ public class UHCPlayer {
 
     int episodeMarkInterval = 0; // in minutes
 
+    public boolean initiatingScoreboard = false;
+
     public UHCPlayer(UHC instance, Player player) {
         plugin = instance;
         this.player = player;
-        setTeam(new Team(plugin, player.getName(), "GRAY"));
         player.setScoreboard(plugin.getScoreboard());
+        initiateHealthScoreboard();
     }
 
     public void setSpectating(boolean isSpectating) {
@@ -50,16 +53,33 @@ public class UHCPlayer {
     }
 
     public void setTeam(Team team) {
-        if(this.team != null) {
+        if(this.team == null) {
+            this.team = team;
+            this.team.addMember(this);
+        } else if(this.team != team) {
             this.team.removeMember(this);
+            this.team = team;
+            this.team.addMember(this);
         }
-        this.team = team;
-        this.team.addMember(this);
     }
 
-    public void resetTeam() {
-        team = new Team(plugin, player.getName(), "GRAY");
-        player.setPlayerListName(ChatColor.GRAY + player.getName());
+    public void initiateHealthScoreboard() {
+        initiatingScoreboard = true;
+        player.damage(0.1);
+        player.setHealth(20.0);
+    }
+
+    public void resetHealth() {
+        player.setHealth(20.0);
+        player.setFoodLevel(20);
+    }
+
+    public String getNameWithColor() {
+        if(team != null) {
+            return team.getColor() + player.getName();
+        } else {
+            return player.getName();
+        }
     }
 
     public Team getTeam() {
@@ -80,9 +100,12 @@ public class UHCPlayer {
 
     public void setFrozen(boolean isFrozen) {
         frozen = isFrozen;
+        int id = 0;
         if(frozen) {
             BukkitScheduler scheduler = Bukkit.getServer().getScheduler();
-            scheduler.scheduleSyncRepeatingTask(plugin, new PlayerFreezeTask(plugin, this), 0, 10);
+            id = scheduler.scheduleSyncRepeatingTask(plugin, new PlayerFreezeTask(plugin, this, id), 0, 10);
+        } else {
+            Bukkit.getScheduler().cancelTask(id);
         }
     }
 
