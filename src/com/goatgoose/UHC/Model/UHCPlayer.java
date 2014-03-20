@@ -53,13 +53,17 @@ public class UHCPlayer {
     }
 
     public void setTeam(Team team) {
-        if(this.team == null) {
-            this.team = team;
-            this.team.addMember(this);
-        } else if(this.team != team) {
-            this.team.removeMember(this);
-            this.team = team;
-            this.team.addMember(this);
+        if(team == null) {
+            this.team = null;
+        } else {
+            if(this.team == null) {
+                this.team = team;
+                this.team.addMember(this);
+            } else if(this.team != team) {
+                this.team.removeMember(this);
+                this.team = team;
+                this.team.addMember(this);
+            }
         }
     }
 
@@ -72,6 +76,10 @@ public class UHCPlayer {
     public void resetHealth() {
         player.setHealth(20.0);
         player.setFoodLevel(20);
+    }
+
+    public void deletePlayer() {
+        plugin.removeUHCPlayer(this);
     }
 
     public String getNameWithColor() {

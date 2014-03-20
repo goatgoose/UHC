@@ -11,6 +11,10 @@ commands:
     description: Creates a new team
     usage: /team create [Team Name] [Team Color]
     permission: uhc.team.create
+  "team clearAll":
+    description: Clears all existing teams
+    usage: /team clearAll
+    permission: uhc.team.clearall
   "team addPlayer":
     description: Adds a new player to the specified team
     usage: /team addPlayer [Team] [Player]
@@ -23,10 +27,6 @@ commands:
     description: Replaces the team's score with the specified score
     usage: /team setScore [Team] [Score]
     permission: uhc.team.setscore
-  "team setColor":
-    description: Sets the team's color
-    usage: /team setColor [Team] [Color]
-    permission: uhc.team.setcolor
   "team list":
     description: Lists all created teams, or players in team if team is defined
     usage: /team list [Team]
@@ -59,6 +59,9 @@ permissions:
   uhc.team.create:
     description: Allows player permission to the /team create command
     default: op
+  uhc.team.clearall:
+    description: Allows player permission to the /team clearAll command
+    default: op
   uhc.team.addplayer:
     description: Allows player permission to the /team addPlayer command
     default: op
@@ -68,9 +71,6 @@ permissions:
   uhc.team.setscore:
     description: Allows player permission to the /team setScore command
     defualt: op
-  uhc.team.setcolor:
-    description: Allows player permission to the /team setColor command
-    defualt: true
   uhc.team.setothercolor:
     description: Allows player permission to specify a team other than their own when using the /team setColor command
     defualt: op

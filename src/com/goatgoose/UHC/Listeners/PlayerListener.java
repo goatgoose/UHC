@@ -4,7 +4,6 @@ import com.goatgoose.uhc.Model.*;
 import com.goatgoose.uhc.UHC;
 import org.bukkit.Bukkit;
 import org.bukkit.ChatColor;
-import org.bukkit.entity.EntityType;
 import org.bukkit.entity.Player;
 import org.bukkit.event.EventHandler;
 import org.bukkit.event.Listener;
@@ -13,7 +12,6 @@ import org.bukkit.event.entity.FoodLevelChangeEvent;
 import org.bukkit.event.entity.PlayerDeathEvent;
 import org.bukkit.event.player.*;
 
-import javax.persistence.Entity;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -36,24 +34,25 @@ public class PlayerListener implements Listener {
     @EventHandler
     public void onDeath(PlayerDeathEvent event) {
         UHCPlayer uhcPlayer = plugin.getUHCPlayer(event.getEntity());
+        Team team = uhcPlayer.getTeam();
         uhcPlayer.setSpectating(true);
         UHCPlayer killer = plugin.getUHCPlayer(event.getEntity().getKiller());
         if(killer != null) {
-            killer.getTeam().addTeamKill();
+            killer.getTeam().addKill();
         }
 
-        List<Team> teamsRemaining = new ArrayList<Team>();
-        for(UHCPlayer player : plugin.getUHCPlayers()) {
-            if(!player.isSpectating()) {
-                if(!teamsRemaining.contains(player.getTeam())) {
-                    teamsRemaining.add(player.getTeam());
-                }
-            }
+        uhcPlayer.deletePlayer();
+
+        if(team.getMembers().size() == 0) {
+            Bukkit.broadcastMessage(team.getColor() + team.getName().toUpperCase() + ChatColor.GOLD + " HAS BEEN ELIMINATED");
+            team.deleteTeam();
         }
-        if(teamsRemaining.size() == 1) {
+
+        if(plugin.getTeams().size() == 1) {
             plugin.setGamestate(UHC.GameState.LOBBY);
-            Team team = teamsRemaining.get(0);
-            Bukkit.broadcastMessage(ChatColor.GOLD + "TEAM " + team.getTeamName().toUpperCase() + " HAS WON UHC");
+            Team winningTeam = plugin.getTeams().get(0);
+            Bukkit.broadcastMessage(winningTeam.getColor() + winningTeam.getName().toUpperCase() + ChatColor.GOLD + " HAS WON UHC");
+            plugin.setGamestate(UHC.GameState.LOBBY);
         }
 
     }

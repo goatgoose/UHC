@@ -50,9 +50,7 @@ public class UHC extends JavaPlugin {
         scoreboardManager = Bukkit.getScoreboardManager();
         scoreboard = scoreboardManager.getNewScoreboard();
 
-        teamKills = scoreboard.registerNewObjective("teamKillsObj", "dummy");
-        teamKills.setDisplaySlot(DisplaySlot.SIDEBAR);
-        teamKills.setDisplayName("Team Kills");
+        registerTeamKills();
 
         healthObj = scoreboard.registerNewObjective("Health", "health");
         healthObj.setDisplaySlot(DisplaySlot.PLAYER_LIST);
@@ -72,12 +70,32 @@ public class UHC extends JavaPlugin {
         }
         if(command.getName().equalsIgnoreCase("team")) {
             if(args[0].equalsIgnoreCase("create")) {
-                if(args.length != 3) {
+                if(args.length != 4) {
                     return false;
                 } else {
-                    Team newTeam = new Team(this, args[1], args[2]);
-                    newTeam.setVisible();
-                    sender.sendMessage("Team " + args[1] + " created!");
+                    if(isColor(args[3])) {
+                        if(!teamExists(args[1])) {
+                            new Team(this, args[1], args[2], args[3]);
+                            sender.sendMessage("Team " + args[1] + " created!");
+                        }
+                    } else {
+                        sender.sendMessage("Color not found, available colors:");
+                        for(ChatColor chatColor1 : ChatColor.values()) {
+                            sender.sendMessage(chatColor1 + chatColor1.name());
+                        }
+                    }
+                    return true;
+                }
+            } else if(args[0].equalsIgnoreCase("clearAll")) {
+                if(args.length != 1) {
+                    return false;
+                } else {
+                    teamKills.unregister();
+                    registerTeamKills();
+                    teams = new ArrayList<Team>();
+                    for(UHCPlayer uhcPlayer1 : getUHCPlayers()) {
+                        uhcPlayer1.setTeam(null);
+                    }
                     return true;
                 }
             } else if(args[0].equalsIgnoreCase("addPlayer")) {
@@ -95,7 +113,7 @@ public class UHC extends JavaPlugin {
                         return false;
                     } else {
                         playerToAdd.setTeam(team);
-                        sender.sendMessage("Player " + playerToAdd.getPlayer().getName() + " added to " + team.getTeamName() + "!");
+                        sender.sendMessage("Player " + playerToAdd.getPlayer().getName() + " added to " + team.getName() + "!");
                         return true;
                     }
                 }
@@ -118,27 +136,12 @@ public class UHC extends JavaPlugin {
                     }
                     try {
                         int score = Integer.parseInt(args[2]);
-                        team.setTeamKills(score);
+                        team.setKills(score);
                         return true;
                     } catch(Exception e) {
                         sender.sendMessage("Invalid score!");
                         return false;
                     }
-                }
-            } else if(args[0].equalsIgnoreCase("setColor")) {
-                if(args.length == 2) {
-                    ChatColor chatColor = ChatColor.valueOf(args[1].toUpperCase());
-                    uhcPlayer.getTeam().setTeamColor(chatColor);
-                    return false;
-                } else if(args.length == 3) {
-                    if(uhcPlayer.getPlayer().hasPermission("uhc.team.setothercolor")) {
-                        Team team = getUHCPlayer(Bukkit.getPlayer(args[1])).getTeam();
-                        ChatColor chatColor = ChatColor.valueOf(args[2].toUpperCase());
-                        team.setTeamColor(chatColor);
-                        return true;
-                    }
-                } else {
-                    return false;
                 }
             } else if(args[0].equalsIgnoreCase("list")) {
                 if(args.length == 1) {
@@ -147,7 +150,7 @@ public class UHC extends JavaPlugin {
                     } else {
                         sender.sendMessage("Teams:");
                         for(Team team : getTeams()) {
-                            sender.sendMessage(team.getColor() + team.getTeamName());
+                            sender.sendMessage(team.getColor() + team.getName());
                         }
                     }
                     return true;
@@ -155,9 +158,9 @@ public class UHC extends JavaPlugin {
                     if(getTeam(args[1]) != null) {
                         Team team = getTeam(args[1]);
                         if(team.getMembers().size() == 0) {
-                            sender.sendMessage("No players in " + team.getTeamName());
+                            sender.sendMessage("No players in " + team.getName());
                         } else {
-                            sender.sendMessage("Players in " + team.getTeamName() + ":");
+                            sender.sendMessage("Players in " + team.getName() + ":");
                             for(UHCPlayer member : team.getMembers()) {
                                 sender.sendMessage(member.getNameWithColor());
                             }
@@ -304,6 +307,10 @@ public class UHC extends JavaPlugin {
         uhcPlayers.add(uhcPlayer);
     }
 
+    public void removeUHCPlayer(UHCPlayer uhcPlayer) {
+        uhcPlayers.remove(uhcPlayer);
+    }
+
     public UHCPlayer getUHCPlayer(Player player) {
         for(UHCPlayer uhcPlayer : uhcPlayers) {
             if(uhcPlayer.getPlayer().equals(player)) {
@@ -326,6 +333,30 @@ public class UHC extends JavaPlugin {
             }
             uhcPlayer.setFrozen(false);
         }
+    }
+
+    public boolean teamExists(String teamName) {
+        for(Team team : getTeams()) {
+            if(team.getName().equalsIgnoreCase(teamName)) {
+                return true;
+            }
+        }
+        return false;
+    }
+
+    public void registerTeamKills() {
+        teamKills = scoreboard.registerNewObjective("teamKillsObj", "dummy");
+        teamKills.setDisplaySlot(DisplaySlot.SIDEBAR);
+        teamKills.setDisplayName("Team Kills");
+    }
+
+    public boolean isColor(String color) {
+        for(ChatColor chatColor : ChatColor.values()) {
+            if(chatColor.name().equalsIgnoreCase(color)) {
+                return true;
+            }
+        }
+        return false;
     }
 
     public void setGamestate(GameState gamestate) {
@@ -352,9 +383,13 @@ public class UHC extends JavaPlugin {
         teams.add(team);
     }
 
+    public void removeTeam(Team team) {
+        teams.remove(team);
+    }
+
     public Team getTeam(String teamName) {
         for(Team team : teams) {
-            if(team.getTeamName().equals(teamName)) {
+            if(team.getName().equals(teamName)) {
                 return team;
             }
         }

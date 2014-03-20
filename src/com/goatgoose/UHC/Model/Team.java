@@ -14,21 +14,31 @@ public class Team {
 
     private UHC plugin;
 
-    private String teamName;
+    private String name;
 
-    private ChatColor teamColor;
+    private String prefix;
+
+    private ChatColor color;
 
     private Score teamKills;
 
+    private org.bukkit.scoreboard.Team vanillaTeam;
+
     private List<UHCPlayer> members = new ArrayList<UHCPlayer>();
 
-    public Team(UHC instance, String teamName, String teamColor) {
+    public Team(UHC instance, String name, String prefix, String color) {
         plugin = instance;
         plugin.addTeam(this);
-        setTeamName(teamName);
-        this.teamColor = ChatColor.valueOf(teamColor.toUpperCase());
+        this.name = name;
+        this.color = ChatColor.valueOf(color.toUpperCase());
+        this.prefix = this.color + "[" + prefix + "] ";
 
-        teamKills = plugin.getTeamKills().getScore(Bukkit.getOfflinePlayer(this.teamColor + teamName));
+        teamKills = plugin.getTeamKills().getScore(Bukkit.getOfflinePlayer(this.color + name));
+        teamKills.setScore(0);
+        setVisible();
+
+        Scoreboard scoreboard = plugin.getScoreboard();
+        vanillaTeam = scoreboard.registerNewTeam(name);
     }
 
     public void teleportTeam(Location location) {
@@ -38,37 +48,51 @@ public class Team {
     }
 
     public void setVisible() {
+        final int previousScore = teamKills.getScore();
         teamKills.setScore(1);
-        teamKills.setScore(0);
+        teamKills.setScore(previousScore);
     }
 
     public void addMember(UHCPlayer uhcPlayer) {
+        Player player = uhcPlayer.getPlayer();
         members.add(uhcPlayer);
-        uhcPlayer.getPlayer().setPlayerListName(teamColor + uhcPlayer.getPlayer().getName());
+        player.setPlayerListName(color + player.getName());
+        player.setDisplayName(color + prefix + player.getName() + ChatColor.WHITE);
+        vanillaTeam.addPlayer(Bukkit.getPlayer(player.getName()));
+
+        if(player.getName().length() < 16 - prefix.length()) {
+            player.setPlayerListName(color + prefix + player.getName() + ChatColor.WHITE);
+        } else if(player.getName().length() < 12) {
+            player.setPlayerListName(color + "[" + prefix.charAt(0) + "] " + player.getName() + ChatColor.WHITE);
+        }
     }
 
     public void removeMember(UHCPlayer uhcPlayer) {
+        Player player = uhcPlayer.getPlayer();
         members.remove(uhcPlayer);
-        uhcPlayer.getPlayer().setPlayerListName(ChatColor.GRAY + uhcPlayer.getPlayer().getName());
+        player.setPlayerListName(ChatColor.WHITE + player.getName());
+        player.setDisplayName(ChatColor.WHITE + player.getName());
+        vanillaTeam.removePlayer(Bukkit.getPlayer(player.getName()));
+    }
+
+    public void deleteTeam() {
+        plugin.removeTeam(this);
+        vanillaTeam.unregister();
     }
 
     public List<UHCPlayer> getMembers() {
         return members;
     }
 
-    public void setTeamName(String teamName) {
-        this.teamName = teamName;
+    public String getName() {
+        return name;
     }
 
-    public String getTeamName() {
-        return teamName;
-    }
-
-    public void addTeamKill() {
+    public void addKill() {
         teamKills.setScore(teamKills.getScore() + 1);
     }
 
-    public void setTeamKills(int teamKills) {
+    public void setKills(int teamKills) {
         this.teamKills.setScore(teamKills);
     }
 
@@ -77,10 +101,10 @@ public class Team {
     }
 
     public ChatColor getColor() {
-        return teamColor;
+        return color;
     }
 
-    public void setTeamColor(ChatColor chatColor) {
-        teamColor = chatColor;
+    public void setColor(ChatColor chatColor) {
+        color = chatColor;
     }
 }
