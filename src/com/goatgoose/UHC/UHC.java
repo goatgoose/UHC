@@ -19,6 +19,7 @@ import org.bukkit.scoreboard.ScoreboardManager;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Random;
 
 public class UHC extends JavaPlugin {
 
@@ -173,6 +174,13 @@ public class UHC extends JavaPlugin {
                 } else {
                     return false;
                 }
+            }
+        } else if(command.getName().equalsIgnoreCase("randomizeTeams")) {
+            if(args.length != 0) {
+                return false;
+            } else {
+                randomizeTeams();
+                informPlayersOfTeams();
             }
         } else if(command.getName().equalsIgnoreCase("spectate")) {
             if(args.length == 0) {
@@ -359,6 +367,51 @@ public class UHC extends JavaPlugin {
         return false;
     }
 
+    public void randomizeTeams() {
+        for(UHCPlayer player : uhcPlayers) {
+            player.setTeam(null);
+        }
+
+        int teamCount = teams.size();
+        int playerCount = uhcPlayers.size();
+        int playersPerTeam = playerCount / teamCount;
+        for(Team team : teams) {
+            for(int i = 0; i < playersPerTeam; i++) {
+                ArrayList<UHCPlayer> availablePlayers = new ArrayList<UHCPlayer>();
+                for(UHCPlayer uhcPlayer : uhcPlayers) {
+                    if(uhcPlayer.getTeam() == null) {
+                        availablePlayers.add(uhcPlayer);
+                    }
+                }
+                Random randomGenerator = new Random();
+                int index = randomGenerator.nextInt(availablePlayers.size());
+                UHCPlayer playerToAdd = availablePlayers.get(index);
+                team.addMember(playerToAdd);
+            }
+        }
+    }
+
+    public void informPlayersOfTeams() {
+        for(Team team : teams) {
+            for(UHCPlayer uhcPlayer : team.getMembers()) {
+                ArrayList<UHCPlayer> teammates = new ArrayList<UHCPlayer>();
+                for(UHCPlayer teammate : team.getMembers()) {
+                    if(!teammate.getPlayer().getName().equals(uhcPlayer.getPlayer().getName())) {
+                        teammates.add(teammate);
+                    }
+                }
+                if(teammates.size() == 0) {
+                    uhcPlayer.getPlayer().sendMessage(ChatColor.GOLD + "You do not have any teammates");
+                } else {
+                    uhcPlayer.getPlayer().sendMessage(ChatColor.GOLD + "Your fellow teammates:");
+                    for(UHCPlayer teammate : teammates) {
+                        uhcPlayer.getPlayer().sendMessage(team.getColor() + teammate.getPlayer().getName());
+                    }
+                }
+            }
+        }
+    }
+
     public void setGamestate(GameState gamestate) {
         this.gamestate = gamestate;
     }
@@ -394,6 +447,16 @@ public class UHC extends JavaPlugin {
             }
         }
         return null;
+    }
+
+    public ArrayList<Team> getActiveTeams() {
+        ArrayList<Team> activeTeams = new ArrayList<Team>();
+        for(Team team : getTeams()) {
+            if(team.isActive()) {
+                activeTeams.add(team);
+            }
+        }
+        return activeTeams;
     }
 
     public List<Team> getTeams() {

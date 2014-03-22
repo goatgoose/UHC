@@ -4,6 +4,7 @@ import com.goatgoose.uhc.Model.*;
 import com.goatgoose.uhc.UHC;
 import org.bukkit.Bukkit;
 import org.bukkit.ChatColor;
+import org.bukkit.Material;
 import org.bukkit.entity.Player;
 import org.bukkit.event.EventHandler;
 import org.bukkit.event.Listener;
@@ -11,6 +12,9 @@ import org.bukkit.event.entity.EntityDamageEvent;
 import org.bukkit.event.entity.FoodLevelChangeEvent;
 import org.bukkit.event.entity.PlayerDeathEvent;
 import org.bukkit.event.player.*;
+import org.bukkit.inventory.Inventory;
+import org.bukkit.inventory.ItemStack;
+import org.bukkit.inventory.meta.SkullMeta;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -39,22 +43,25 @@ public class PlayerListener implements Listener {
         UHCPlayer killer = plugin.getUHCPlayer(event.getEntity().getKiller());
         if(killer != null) {
             killer.getTeam().addKill();
+
+            //untested
+            ItemStack skull = new ItemStack(Material.SKULL, 1);
+            SkullMeta skullMeta = (SkullMeta) skull.getItemMeta();
+            skullMeta.setOwner(killer.getPlayer().getName());
+            skull.setItemMeta(skullMeta);
+            killer.getPlayer().getWorld().dropItemNaturally(killer.getPlayer().getLocation(), skull);
         }
 
-        uhcPlayer.deletePlayer();
-
-        if(team.getMembers().size() == 0) {
+        if(team.isActive()) {
             Bukkit.broadcastMessage(team.getColor() + team.getName().toUpperCase() + ChatColor.GOLD + " HAS BEEN ELIMINATED");
             team.deleteTeam();
         }
 
-        if(plugin.getTeams().size() == 1) {
+        if(plugin.getActiveTeams().size() <= 1) {
             plugin.setGamestate(UHC.GameState.LOBBY);
             Team winningTeam = plugin.getTeams().get(0);
             Bukkit.broadcastMessage(winningTeam.getColor() + winningTeam.getName().toUpperCase() + ChatColor.GOLD + " HAS WON UHC");
-            plugin.setGamestate(UHC.GameState.LOBBY);
         }
-
     }
 
     @EventHandler

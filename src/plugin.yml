@@ -31,6 +31,10 @@ commands:
     description: Lists all created teams, or players in team if team is defined
     usage: /team list [Team]
     permission: uhc.team.list
+  "randomizeTeams":
+    description: Evenly spreads players out through all created teams. If players cannot be evenly spread, there will be some remaining players without a team.
+    usage: /randomizeTeams
+    permission: uhc.randomizeteams
   "spectate":
     description: Toggles spectate mode for the specified player
     usage: /spectate [Player]
@@ -77,6 +81,9 @@ permissions:
   uhc.team.list:
     description: Allows player permission to the /team list command
     defualt: true
+  uhc.randomizeteams:
+    description: Allows player permission to the /randomizeTeams command
+    defualt: op
   uhc.spectate:
     description: Allows player permission to the /spectate command
     default: op

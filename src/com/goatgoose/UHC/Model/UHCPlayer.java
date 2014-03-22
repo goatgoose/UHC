@@ -32,6 +32,11 @@ public class UHCPlayer {
         this.player = player;
         player.setScoreboard(plugin.getScoreboard());
         initiateHealthScoreboard();
+
+        player.setGameMode(GameMode.SURVIVAL);
+        for(UHCPlayer uhcPlayer : plugin.getUHCPlayers()) {
+            uhcPlayer.getPlayer().showPlayer(player);
+        }
     }
 
     public void setSpectating(boolean isSpectating) {

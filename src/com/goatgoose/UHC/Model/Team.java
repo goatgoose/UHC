@@ -1,9 +1,11 @@
 package com.goatgoose.uhc.Model;
 
 import com.goatgoose.uhc.UHC;
+import net.minecraft.server.v1_7_R1.EntityPlayer;
 import org.bukkit.Bukkit;
 import org.bukkit.ChatColor;
 import org.bukkit.Location;
+import org.bukkit.craftbukkit.v1_7_R1.entity.CraftPlayer;
 import org.bukkit.entity.Player;
 import org.bukkit.scoreboard.*;
 
@@ -59,12 +61,6 @@ public class Team {
         player.setPlayerListName(color + player.getName());
         player.setDisplayName(color + prefix + player.getName() + ChatColor.WHITE);
         vanillaTeam.addPlayer(Bukkit.getPlayer(player.getName()));
-
-        if(player.getName().length() < 16 - prefix.length()) {
-            player.setPlayerListName(color + prefix + player.getName() + ChatColor.WHITE);
-        } else if(player.getName().length() < 12) {
-            player.setPlayerListName(color + "[" + prefix.charAt(0) + "] " + player.getName() + ChatColor.WHITE);
-        }
     }
 
     public void removeMember(UHCPlayer uhcPlayer) {
@@ -78,6 +74,15 @@ public class Team {
     public void deleteTeam() {
         plugin.removeTeam(this);
         vanillaTeam.unregister();
+    }
+
+    public boolean isActive() {
+        for(UHCPlayer uhcPlayer : getMembers()) {
+            if(!uhcPlayer.isSpectating()) {
+                return true;
+            }
+        }
+        return false;
     }
 
     public List<UHCPlayer> getMembers() {
